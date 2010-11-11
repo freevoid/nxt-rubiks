@@ -1,0 +1,34 @@
+//MASTER
+#define BT_CONN 0
+#define INBOX 1
+#define OUTBOX 5
+#define ACK "ack"
+
+sub BTCheck(int conn){
+    if (!BluetoothStatus(conn)==NO_ERR){
+        TextOut(5,LCD_LINE2,"Error");
+        Wait(1000);
+        Stop(true);
+    }
+}
+
+sub perform_command(string cmd){
+    TextOut(0,LCD_LINE2,"CMD:");
+    TextOut(10,LCD_LINE3,cmd);
+    // TODO: cmd parsing and execution
+    TextOut(0,LCD_LINE4,"OUT:");
+    TextOut(10,LCD_LINE5,ACK);
+}
+
+task main(){
+    string in;
+    BTCheck(0); //check master connection
+    TextOut(10,LCD_LINE1,"Master Connected");
+    while(true){
+        ReceiveRemoteString(INBOX, true, in);
+        perform_command(in);
+        SendResponseString(OUTBOX, ACK);
+        Wait(100);
+    }
+}
+
