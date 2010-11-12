@@ -2,7 +2,33 @@
 #define BT_CONN 0
 #define INBOX 1
 #define OUTBOX 5
+
+#define RECEIVE_DELAY 100
 #define ACK "ack"
+
+#define CMD_ECHO_LINE LCD_LINE3
+#define RESPONSE_ECHO_LINE LCD_LINE5
+#define INFO_LINE LCD_LINE6
+
+#define CMD_SEPARATOR ':'
+
+// opcodes
+#define CMD_TURN 0
+
+// retvals
+#define OK 0
+#define E_WRONG_OPCODE 255
+
+struct Command {
+    int code;
+    int args[5];
+};
+
+inline void TextOutReplace(int x, int y, string msg)
+{
+    ClearLine(y);
+    TextOut(x, y, msg);
+}
 
 sub BTCheck(int conn){
     if (!BluetoothStatus(conn)==NO_ERR){
@@ -12,23 +38,82 @@ sub BTCheck(int conn){
     }
 }
 
+int cmd_turn(int args[]) {
+    TextOutReplace(0, INFO_LINE, StrCat("Turning! ", NumToStr(args[1]), ":", NumToStr(args[2])));
+    RotateMotor(args[0], args[1], args[2]);
+    ClearLine(INFO_LINE);
+    return degrees;
+}
+
+int execute_command(Command cmd) {
+    if (cmd.code == CMD_TURN) {
+        return cmd_turn(cmd.args);
+    } else {
+        return E_WRONG_OPCODE;
+    }
+}
+
+inline void enhanced_strcpy(string starray[], int idx, string src) {
+    int i=0;
+    for (i=0; i<StrLen(src); i++) {
+        starray[idx][i] = src[i];
+    }
+    starray[idx][i] = 0;
+}
+
+Command parse_command(string cmdstring) {
+    Command cmd;
+    ArrayInit(cmd.args, -1, 5);
+
+    cmd.code = -1;
+    int code = -1;
+    int lasttokenpos = 0;
+    int tokenidx = 0;
+    for (int i=0; i<StrLen(cmdstring); i++) {
+        char cur = cmdstring[i];
+        if (cur == CMD_SEPARATOR) {
+            string token = SubStr(cmdstring, lasttokenpos, i-lasttokenpos);
+            if (code != -1) {
+                //string a = cmd.args[tokenidx];
+                //strcpy(a, token);
+                cmd.args[tokenidx] = StrToNum(token);
+                //enhanced_strcpy(cmd.args, tokenidx, token);
+                tokenidx++;
+            } else {
+                code = StrToNum(token);
+                cmd.code = code;
+            }
+            lasttokenpos = i+1;
+        }
+    }
+    return cmd;
+}
+
 sub perform_command(string cmd){
-    TextOut(0,LCD_LINE2,"CMD:");
-    TextOut(10,LCD_LINE3,cmd);
-    // TODO: cmd parsing and execution
-    TextOut(0,LCD_LINE4,"OUT:");
-    TextOut(10,LCD_LINE5,ACK);
+    Command parsed_cmd;
+    int retval;
+
+    TextOutReplace(10, CMD_ECHO_LINE, cmd);
+    
+    parsed_cmd = parse_command(cmd);
+    retval = execute_command(parsed_cmd);
+
+    TextOutReplace(10, RESPONSE_ECHO_LINE, NumToStr(retval));
 }
 
 task main(){
     string in;
     BTCheck(0); //check master connection
+
     TextOut(10,LCD_LINE1,"Master Connected");
+    TextOut(0,LCD_LINE2,"CMD:");
+    TextOut(0, LCD_LINE4, "OUT:");
+
     while(true){
         ReceiveRemoteString(INBOX, true, in);
         perform_command(in);
         SendResponseString(OUTBOX, ACK);
-        Wait(100);
+        Wait(RECEIVE_DELAY);
     }
 }
 
