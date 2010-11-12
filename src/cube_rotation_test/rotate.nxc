@@ -1,0 +1,58 @@
+const char PEDESTAL_PORT = OUT_A;
+const char HAND_PORT = OUT_B;
+const char CAMERA_PORT = OUT_C;
+
+const bool HELP_VERTICAL_TURN = false;
+
+int pedestal_angle;
+int pedestal_angle_error = 0;
+
+sub VerticalTurn() {
+    Off(PEDESTAL_PORT);
+    RotateMotor(HAND_PORT, 88, 70);
+    Wait(400);
+    if (HELP_VERTICAL_TURN) {
+        RotateMotor(HAND_PORT, 50, -50);
+        RotateMotor(HAND_PORT, 88, 15);
+        Wait(100);
+        RotateMotor(HAND_PORT, 50, -35);
+    } else {
+        RotateMotor(HAND_PORT, 50, -70);
+    }
+}
+
+sub HorizontalTurn(int count, bool strong) {
+    int strength = strong ? 40 : 30;
+    int angle;
+    if (count == 1) {
+        angle = 90;
+    }
+    if (count == 2) {
+        angle = 180;
+    }
+    if (count == 3) {
+        angle = -90;
+    }
+    //angle -= pedestal_angle_error;
+    //int predicted_angle = pedestal_angle + angle;
+    RotateMotor(PEDESTAL_PORT, strength, angle);
+    //pedestal_angle_error = MotorTachoCount(PEDESTAL_PORT) - predicted_angle;
+}
+
+sub Move(int count) {
+    RotateMotor(HAND_PORT, 80, 30);
+    Off(HAND_PORT);
+    HorizontalTurn(count, true); 
+    RotateMotor(HAND_PORT, 80, -30);
+}
+
+task main() {
+    pedestal_angle = MotorTachoCount(PEDESTAL_PORT);
+    RotateMotor(PEDESTAL_PORT, 20, -pedestal_angle);
+    HorizontalTurn(1, false);
+    VerticalTurn();
+    Move(2);
+    VerticalTurn();
+    HorizontalTurn(3, false);
+}
+
