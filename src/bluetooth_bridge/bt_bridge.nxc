@@ -1,4 +1,5 @@
-//MASTER
+#include "rotate.nxc"
+
 #define BT_CONN 0
 #define INBOX 1
 #define OUTBOX 5
@@ -14,6 +15,10 @@
 
 // opcodes
 #define CMD_TURN 0
+#define CMD_VTURN 1
+#define CMD_HTURN 2
+#define CMD_MOVE 3
+#define CMD_EXIT 666
 
 // retvals
 #define OK 0
@@ -39,15 +44,38 @@ sub BTCheck(int conn){
 }
 
 int cmd_turn(int args[]) {
-    TextOutReplace(0, INFO_LINE, StrCat("Turning! ", NumToStr(args[1]), ":", NumToStr(args[2])));
-    RotateMotor(args[0], args[1], args[2]);
+    //TextOutReplace(0, INFO_LINE, StrCat("Turning! ", NumToStr(args[1]), ":", NumToStr(args[2])));
+    //RotateMotor(args[0], args[1], args[2]);
     ClearLine(INFO_LINE);
-    return degrees;
+    return OK;
+}
+
+int cmd_vturn(int args[]) {
+    VerticalTurn();
+    return OK;
+}
+
+int cmd_hturn(int args[]) {
+    HorizontalTurn(args[0], args[1]);
+    return OK;
+}
+
+int cmd_move(int args[]) {
+    Move(args[0]);
+    return OK;
 }
 
 int execute_command(Command cmd) {
     if (cmd.code == CMD_TURN) {
         return cmd_turn(cmd.args);
+    } else if (cmd.code == CMD_VTURN) {
+        return cmd_vturn(cmd.args);
+    } else if (cmd.code == CMD_HTURN) {
+        return cmd_hturn(cmd.args);
+    } else if (cmd.code == CMD_MOVE) {
+        return cmd_move(cmd.args);
+    } else if (cmd.code == CMD_EXIT) {
+        Stop(true);
     } else {
         return E_WRONG_OPCODE;
     }

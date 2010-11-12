@@ -46,6 +46,7 @@ sub Move(int count) {
     RotateMotor(HAND_PORT, 80, -30);
 }
 
+/*
 task main() {
     pedestal_angle = MotorTachoCount(PEDESTAL_PORT);
     RotateMotor(PEDESTAL_PORT, 20, -pedestal_angle);
@@ -55,4 +56,5 @@ task main() {
     VerticalTurn();
     HorizontalTurn(3, false);
 }
+*/
 
