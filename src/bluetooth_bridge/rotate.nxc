@@ -9,15 +9,15 @@ int pedestal_angle_error = 0;
 
 sub VerticalTurn() {
     Off(PEDESTAL_PORT);
-    RotateMotor(HAND_PORT, 88, 70);
+    RotateMotor(HAND_PORT, 88, 65);
     Wait(400);
     if (HELP_VERTICAL_TURN) {
-        RotateMotor(HAND_PORT, 50, -50);
+        RotateMotor(HAND_PORT, 50, -45);
         RotateMotor(HAND_PORT, 88, 15);
         Wait(100);
         RotateMotor(HAND_PORT, 50, -35);
     } else {
-        RotateMotor(HAND_PORT, 50, -70);
+        RotateMotor(HAND_PORT, 50, -65);
     }
 }
 
