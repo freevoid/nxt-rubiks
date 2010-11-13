@@ -131,9 +131,9 @@ sub perform_command(string cmd){
 
 task main(){
     string in;
-    BTCheck(0); //check master connection
+    //BTCheck(0); //check master connection
 
-    TextOut(10,LCD_LINE1,"Master Connected");
+    //TextOut(10,LCD_LINE1,"Master Connected");
     TextOut(0,LCD_LINE2,"CMD:");
     TextOut(0, LCD_LINE4, "OUT:");
 
