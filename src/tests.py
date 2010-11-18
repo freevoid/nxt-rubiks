@@ -4,10 +4,26 @@ from rubiks import RotationType, FaceType
 from rubiks import cube
 from rubiks import rotation
 
+solved_cube_pprinted =\
+'''    .---.
+    |555|
+    |555|
+    |555|
+.---.---.---.---.
+|111|222|333|444|
+|111|222|333|444|
+|111|222|333|444|
+.---.---.---.---.
+    |666|
+    |666|
+    |666|
+    .---.
+'''
+
 class CubeManipulationsTestCase(unittest.TestCase):
     
     def setUp(self):
-        context = dict(zip(FaceType.FACES, (cube.NumpyCube.make_face(i) for i in range(6))))
+        context = dict(zip(FaceType.FACES, (cube.NumpyCube.make_face(i) for i in range(1, 7))))
         self.solved_cube = cube.NumpyCube(context)
         self.face_from_label_list = cube.NumpyCube.face_from_label_list
         self.face = self.face_from_label_list(range(1,10))
@@ -39,10 +55,26 @@ class CubeManipulationsTestCase(unittest.TestCase):
                  3, 2, 1]))
 
     def test_cube_rotations(self):
-        pass
-        #self.assertEqualFaces(self.cube.get_face(FaceType.FRONT))
-        #rotation.rotate_x(self.cube)
-        
+
+        cube = self.solved_cube.copy()
+
+        rotation.rotate(cube, rotation.X, RotationType.CLOCKWISE)
+        self.assertNotEqual(cube, self.solved_cube)
+        rotation.rotate(cube, rotation.X, RotationType.ANTICLOCKWISE)
+        self.assertEqual(cube, self.solved_cube)
+        rotation.rotate(cube, rotation.Y, RotationType.CLOCKWISE)
+        self.assertNotEqual(cube, self.solved_cube)
+        rotation.rotate(cube, rotation.Y, RotationType.ANTICLOCKWISE)
+        self.assertEqual(cube, self.solved_cube)
+        rotation.rotate(cube, rotation.Z, RotationType.CLOCKWISE)
+        self.assertNotEqual(cube, self.solved_cube)
+        rotation.rotate(cube, rotation.Z, RotationType.ANTICLOCKWISE)
+        self.assertEqual(cube, self.solved_cube)
+ 
+    def test_pprint(self):
+        self.assertEqual(self.solved_cube.pprint(), solved_cube_pprinted)
+
+
 if __name__ == '__main__':
     unittest.main()
 

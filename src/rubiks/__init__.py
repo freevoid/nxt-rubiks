@@ -13,7 +13,7 @@ class FaceType:
     RIGHT = 'R'
     UP = 'U'
 
-    FACES = (FRONT, BACK, DOWN, UP, LEFT, RIGHT)
+    FACES = (BACK, DOWN, FRONT, UP, LEFT, RIGHT)
 
 CUBE_ROTATION = 'cube rotation'
 QUARTER_FACE_ROTATION = 'quarter face rotation'
