@@ -3,6 +3,7 @@ import unittest
 from rubiks import RotationType, FaceType
 from rubiks import cube
 from rubiks import rotation
+from rubiks import cube_operation
 
 solved_cube_pprinted =\
 '''    .---.
@@ -58,21 +59,44 @@ class CubeManipulationsTestCase(unittest.TestCase):
 
         cube = self.solved_cube.copy()
 
-        rotation.rotate(cube, rotation.X, RotationType.CLOCKWISE)
+        rotation.rotate(cube, (rotation.X, RotationType.CLOCKWISE))
         self.assertNotEqual(cube, self.solved_cube)
-        rotation.rotate(cube, rotation.X, RotationType.ANTICLOCKWISE)
+        rotation.rotate(cube, (rotation.X, RotationType.ANTICLOCKWISE))
         self.assertEqual(cube, self.solved_cube)
-        rotation.rotate(cube, rotation.Y, RotationType.CLOCKWISE)
+        rotation.rotate(cube, (rotation.Y, RotationType.CLOCKWISE))
         self.assertNotEqual(cube, self.solved_cube)
-        rotation.rotate(cube, rotation.Y, RotationType.ANTICLOCKWISE)
+        rotation.rotate(cube, (rotation.Y, RotationType.ANTICLOCKWISE))
         self.assertEqual(cube, self.solved_cube)
-        rotation.rotate(cube, rotation.Z, RotationType.CLOCKWISE)
+        rotation.rotate(cube, (rotation.Z, RotationType.CLOCKWISE))
         self.assertNotEqual(cube, self.solved_cube)
-        rotation.rotate(cube, rotation.Z, RotationType.ANTICLOCKWISE)
+        rotation.rotate(cube, (rotation.Z, RotationType.ANTICLOCKWISE))
         self.assertEqual(cube, self.solved_cube)
  
     def test_pprint(self):
         self.assertEqual(self.solved_cube.pprint(), solved_cube_pprinted)
+
+    def test_comlex_operations(self):
+        cube = self.solved_cube.copy()
+        # make some crazy moves
+        self.assertEqual(str(cube_operation.perform_coded_operations(cube, "FUD2xB2y2R'z'L'F2D'")),
+'''    .---.
+    |254|
+    |236|
+    |533|
+.---.---.---.---.
+|664|125|245|341|
+|121|266|145|355|
+|666|352|345|211|
+.---.---.---.---.
+    |426|
+    |313|
+    |441|
+    .---.
+''')
+        # perform opposite moves
+        cube_operation.perform_coded_operations(cube, "DF2LzRy2B2x'D2U'F'")
+        # assert that cube is back to start position
+        self.assertEqual(cube, self.solved_cube)
 
 
 if __name__ == '__main__':
