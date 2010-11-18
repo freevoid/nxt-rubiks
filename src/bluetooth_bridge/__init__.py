@@ -1,10 +1,12 @@
 INBOX_ID = 1
 
+# format: METHOD_NAME: (OPCODE, ARGUMENT_AMOUNT)
 OPCODES = {
-    'vertical_turn': 1,
-    'horizontal_turn': 2,
-    'move': 3,
-    'exit': 666,
+    'vertical_turn': (1, 0),
+    'horizontal_turn': (2, 1),
+    'move': (3, 3),
+    'configure_hturn': (4, 2),
+    'exit': (666, 0),
 }
 
 class CommanderMeta(type):
@@ -15,9 +17,11 @@ class CommanderMeta(type):
         return super(CommanderMeta, cls).__new__(cls, name, bases, attrs)
 
     @staticmethod
-    def _make_operation(opcode):
+    def _make_operation((opcode, argcount)):
         op_prefix = '%s:' % opcode
         def performer(self, *args):
+            if len(args) != argcount:
+                raise ValueError("Operation expected exacly %d arguments" % argcount)
             msg = op_prefix + ':'.join(str(a) for a in args) + ':'
             self.brick.message_write(self.inbox_id, msg)
         return performer

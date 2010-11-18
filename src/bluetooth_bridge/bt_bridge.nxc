@@ -18,6 +18,7 @@
 #define CMD_VTURN 1
 #define CMD_HTURN 2
 #define CMD_MOVE 3
+#define CMD_CONFIG_HTURN 4
 #define CMD_EXIT 666
 
 // retvals
@@ -61,7 +62,12 @@ int cmd_hturn(int args[]) {
 }
 
 int cmd_move(int args[]) {
-    Move(args[0]);
+    Move(args[0], args[1], args[2]);
+    return OK;
+}
+
+int cmd_configure_hor(int args[]) {
+    ConfigureHorizontalTurnPower(args[0], args[1]);
     return OK;
 }
 
@@ -74,6 +80,8 @@ int execute_command(Command cmd) {
         return cmd_hturn(cmd.args);
     } else if (cmd.code == CMD_MOVE) {
         return cmd_move(cmd.args);
+    } else if (cmd.code == CMD_CONFIG_HTURN) {
+        return cmd_configure_hor(cmd.args);
     } else if (cmd.code == CMD_EXIT) {
         Stop(true);
     } else {

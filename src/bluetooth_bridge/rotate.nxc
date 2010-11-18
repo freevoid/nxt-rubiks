@@ -2,10 +2,17 @@ const char PEDESTAL_PORT = OUT_A;
 const char HAND_PORT = OUT_B;
 const char CAMERA_PORT = OUT_C;
 
-const bool HELP_VERTICAL_TURN = false;
+bool HELP_VERTICAL_TURN = false;
+int STRONG_HORIZONTAL_TURN_POWER = 50;
+int NORMAL_HORIZONTAL_TURN_POWER = 30;
 
 int pedestal_angle;
 int pedestal_angle_error = 0;
+
+sub ConfigureHorizontalTurnPower(int normal, int strong) {
+    STRONG_HORIZONTAL_TURN_POWER = strong;
+    NORMAL_HORIZONTAL_TURN_POWER = normal;
+}
 
 sub VerticalTurn() {
     Off(PEDESTAL_PORT);
@@ -22,7 +29,7 @@ sub VerticalTurn() {
 }
 
 sub HorizontalTurn(int count, bool strong) {
-    int strength = strong ? 40 : 30;
+    int strength = strong ? STRONG_HORIZONTAL_TURN_POWER : NORMAL_HORIZONTAL_TURN_POWER;
     int angle;
     if (count == 1) {
         angle = 90;
@@ -39,11 +46,11 @@ sub HorizontalTurn(int count, bool strong) {
     //pedestal_angle_error = MotorTachoCount(PEDESTAL_PORT) - predicted_angle;
 }
 
-sub Move(int count) {
-    RotateMotor(HAND_PORT, 80, 30);
+sub Move(int count, int power, int degree) {
+    RotateMotor(HAND_PORT, power, degree);
     Off(HAND_PORT);
     HorizontalTurn(count, true); 
-    RotateMotor(HAND_PORT, 80, -30);
+    RotateMotor(HAND_PORT, power, -degree);
 }
 
 /*
