@@ -24,8 +24,7 @@ solved_cube_pprinted =\
 class CubeManipulationsTestCase(unittest.TestCase):
     
     def setUp(self):
-        context = dict(zip(FaceType.FACES, (cube.NumpyCube.make_face(i) for i in range(1, 7))))
-        self.solved_cube = cube.NumpyCube(context)
+        self.solved_cube = cube.NumpyCube.solved_cube()
         self.face_from_label_list = cube.NumpyCube.face_from_label_list
         self.face = self.face_from_label_list(range(1,10))
 
@@ -98,6 +97,18 @@ class CubeManipulationsTestCase(unittest.TestCase):
         # assert that cube is back to start position
         self.assertEqual(cube, self.solved_cube)
 
+    def test_all_positions_iteration(self):
+        cube = self.solved_cube.copy()
+        # check that all positions in iteration are unique
+        iterated = []
+        for c, p, bp in rotation.iterate_all_positions(cube):
+            self.assertTrue(c not in iterated)
+            iterated.append(c.copy())
+
+        # check that there are exactly 24 unique positions
+        self.assertEqual(len(iterated), 24)
+        # check that iteration didn't affected argument after all
+        self.assertEqual(cube, self.solved_cube)
 
 if __name__ == '__main__':
     unittest.main()

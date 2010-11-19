@@ -13,6 +13,9 @@ class Cube(object):
     def set_context(self, new_context):
         self._context = new_context
 
+    def get_context(self):
+        return self._context
+
     def pprint(self):
         left = self.get_face(FaceType.LEFT)
         right = self.get_face(FaceType.RIGHT)
@@ -56,7 +59,7 @@ class NumpyCube(Cube):
 
     @classmethod
     def solved_cube(cls):
-        context = dict(zip(FaceType.FACES, (cls.make_face(i) for i in range(1,7))))
+        context = dict(zip(FaceType.FACES, (cls.make_solid_face(i) for i in range(1,7))))
         return cls(context)
 
     @staticmethod
@@ -85,6 +88,9 @@ class NumpyCube(Cube):
     def get_face(self, face_name):
         return self._context[face_name]
 
+    def get_flat_face(self, face_name):
+        return self._context[face_name].flat
+
     def set_face(self, face_name, face):
         self._context[face_name] = face
 
@@ -92,6 +98,6 @@ class NumpyCube(Cube):
         return map(self.get_face, faces)
 
     @staticmethod
-    def make_face(color):
+    def make_solid_face(color):
         return numpy.zeros((3,3), int) + color 
 

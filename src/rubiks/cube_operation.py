@@ -39,13 +39,17 @@ def parse_cube_notation(coded_operations):
         else:
             raise ValueError("Unexpected token type: %s" % type_)
 
+def perform_united_operation(cube, op_type, op_parameters):
+    op = OPERATION_TYPE_MAP.get(op_type)
+    if op is None:
+        raise ValueError("Unknown cube operation type: %s" % op)
+    else:
+        cube = op(cube, op_parameters)
+    return cube
+
 def perform_united_operations(cube, op_path):
     for op_type, op_parameters in op_path:
-        op = OPERATION_TYPE_MAP.get(op_type)
-        if op is None:
-            raise ValueError("Unknown cube operation type: %s" % op)
-        else:
-            cube = op(cube, op_parameters)
+        cube = perform_united_operation(cube, op_type, op_parameters)
     return cube
 
 def perform_coded_operations(cube, coded_operations):

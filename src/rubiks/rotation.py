@@ -92,6 +92,7 @@ class RotationPath(object):
     
     def __init__(self, path=None):
         self._path = path if path is not None else []
+        super(RotationPath, self).__init__()
 
     def __iter__(self):
         return iter(self._path)
@@ -126,4 +127,38 @@ OPERATION_MAP = {}
 for axis, rotation_type, operation in make_rotation_operations(ROTATION_MAPS):
     axis_dict = OPERATION_MAP.setdefault(axis, {})
     axis_dict[rotation_type] = operation
+
+ALL_POSITIONS_PATH = (
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (X, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (X, RotationType.CLOCKWISE),
+        (Y, RotationType.ANTICLOCKWISE),
+        (Y, RotationType.ANTICLOCKWISE),
+        (Y, RotationType.ANTICLOCKWISE),
+        (X, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (X, RotationType.CLOCKWISE),
+        (Y, RotationType.ANTICLOCKWISE),
+        (Y, RotationType.ANTICLOCKWISE),
+        (Y, RotationType.ANTICLOCKWISE),
+        (X, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+        (Y, RotationType.CLOCKWISE),
+    )
+
+def iterate_all_positions(cube):
+    cube_sample = cube.copy()
+    rotation_path = RotationPath()
+    yield cube_sample, (), ()
+    for rotation in ALL_POSITIONS_PATH:
+        rotation_path.add_rotation(rotation)
+        yield rotate(cube_sample, rotation), rotation_path, rotation_path.reversed_path()
 
