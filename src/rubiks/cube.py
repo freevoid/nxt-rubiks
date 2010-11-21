@@ -41,6 +41,12 @@ class Cube(object):
     def __str__(self):
         return self.pprint()
 
+    @classmethod
+    def from_scramble_path(cls, path):
+        x = cls.solved_cube()
+        import rubiks.cube_operation
+        return rubiks.cube_operation.perform_coded_operations(x, path)
+
 
 class NumpyCube(Cube):
  

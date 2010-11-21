@@ -155,7 +155,7 @@ ALL_POSITIONS_PATH = (
     )
 
 def iterate_all_positions(cube):
-    cube_sample = cube.copy()
+    cube_sample = cube
     rotation_path = RotationPath()
     yield cube_sample, (), ()
     for rotation in ALL_POSITIONS_PATH:

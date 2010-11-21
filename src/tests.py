@@ -3,7 +3,9 @@ import unittest
 from rubiks import RotationType, FaceType
 from rubiks import cube
 from rubiks import rotation
+from rubiks import face_turn
 from rubiks import cube_operation
+from rubiks.solver import common_patterns
 
 solved_cube_pprinted =\
 '''    .---.
@@ -21,8 +23,8 @@ solved_cube_pprinted =\
     .---.
 '''
 
-class CubeManipulationsTestCase(unittest.TestCase):
-    
+class CubeTestCaseBase(unittest.TestCase):
+
     def setUp(self):
         self.solved_cube = cube.NumpyCube.solved_cube()
         self.face_from_label_list = cube.NumpyCube.face_from_label_list
@@ -30,6 +32,9 @@ class CubeManipulationsTestCase(unittest.TestCase):
 
     def assertEqualFaces(self, f1, f2):
         self.assertEqual(list(f1.flat), list(f2.flat))
+
+
+class CubeManipulationsTestCase(CubeTestCaseBase):
 
     def test_face_rotations(self):
         face = self.face.copy()
@@ -108,7 +113,27 @@ class CubeManipulationsTestCase(unittest.TestCase):
         # check that there are exactly 24 unique positions
         self.assertEqual(len(iterated), 24)
         # check that iteration didn't affected argument after all
-        self.assertEqual(cube, self.solved_cube)
+        # self.assertEqual(cube, self.solved_cube)
+
+
+class CubePatternsTestCase(CubeTestCaseBase):
+
+    def test_basic_patterns(self):
+        self.assertTrue(self.solved_cube, common_patterns.cross_pattern)
+        self.assertTrue(self.solved_cube, common_patterns.f2l_pattern)
+        self.assertTrue(self.solved_cube, common_patterns.done_pattern)
+
+        cube = self.solved_cube.copy()
+
+        cube = face_turn.perform_face_turn(cube, (FaceType.UP, RotationType.CLOCKWISE))
+        self.assertTrue(common_patterns.cross_pattern.match_pattern(cube))
+        self.assertTrue(common_patterns.f2l_pattern.match_pattern(cube))
+        self.assertFalse(common_patterns.done_pattern.match_pattern(cube))
+
+        cube = face_turn.perform_face_turn(cube, (FaceType.RIGHT, RotationType.CLOCKWISE))
+        self.assertFalse(common_patterns.cross_pattern.match_pattern(cube))
+        self.assertFalse(common_patterns.f2l_pattern.match_pattern(cube))
+        self.assertFalse(common_patterns.done_pattern.match_pattern(cube))
 
 if __name__ == '__main__':
     unittest.main()
