@@ -343,9 +343,25 @@ class MiddleSideBlocks(solver.SolveStage):
          ({
             FaceType.FRONT: [3, 0, 0,
                              3, 3, 0,
-                             3, 6, 0],
+                             3, '-3', 0],
             FaceType.RIGHT: [6, 6, 6,
-                             0, 6, 3,
+                             0, 6, '-6',
+                             0, 0, 0],
+          }, "U'F'U'FURUR'"),
+         ({
+            FaceType.FRONT: [3, 0, 0,
+                             3, 3, 0,
+                             3, -3, 0],
+            FaceType.RIGHT: [6, 6, 6,
+                             0, 6, 6,
+                             0, 0, 0],
+          }, "U'F'U'FURUR'"),
+         ({
+            FaceType.FRONT: [3, 0, 0,
+                             3, 3, 0,
+                             3, 3, 0],
+            FaceType.RIGHT: [6, 6, 6,
+                             0, 6, -6,
                              0, 0, 0],
           }, "U'F'U'FURUR'"),
         )]
