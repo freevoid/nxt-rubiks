@@ -157,7 +157,7 @@ ALL_POSITIONS_PATH = (
 def iterate_all_positions(cube):
     cube_sample = cube
     rotation_path = RotationPath()
-    yield cube_sample, (), ()
+    yield cube_sample, rotation_path, ()
     for rotation in ALL_POSITIONS_PATH:
         rotation_path.add_rotation(rotation)
         yield rotate(cube_sample, rotation), rotation_path, rotation_path.reversed_path()

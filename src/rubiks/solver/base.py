@@ -33,10 +33,11 @@ class CubePattern(object):
     Do exact match with corresponding cube element. Do not use a mapping.
     
     '''
+    verbosity = 0
 
     def __init__(self, pattern, verbosity=0):
         self._pattern = pattern
-        self.verbosity = verbosity
+        #self.verbosity = verbosity
         super(CubePattern, self).__init__()
 
     @classmethod
@@ -55,8 +56,14 @@ class CubePattern(object):
         Original cube stays unchanged.
         '''
         for cube_sample, path, back_path in rotation.iterate_all_positions(cube.copy()):
+            if self.verbosity:
+                print "MATCHING AT POSITION:"
+                print cube_sample
+                print path._path
+
             if self.match_pattern(cube_sample):
                 # stop iterating, pattern matched!
+                if self.verbosity: print "MATCHED!!!!"
                 return cube_sample, path
         return None
 
@@ -161,9 +168,13 @@ class SolveStage(object):
     stage_patterns = ()
     safe_action = None
 
+    default_max_moves = 50
+
     verbosity = 0
 
-    def __call__(self, cube):
+    def __call__(self, cube, max_moves=None):
+        num_moves = 0
+        max_moves = max_moves or self.default_max_moves
         final_match = self.final_pattern.check_at_all_positions(cube)
         while final_match is None:
             action = self.choose_stage_action(cube)
@@ -179,6 +190,9 @@ class SolveStage(object):
                 raise StageError("After stage action cube has not changed!", cube.copy())
 
             final_match = self.final_pattern.check_at_all_positions(cube)
+            num_moves += 1
+            if num_moves >= max_moves:
+                raise StageError("Max moves exceeded", cube)
 
         final_cube, path = final_match
         #for x in path: yield cube_operation.tag_rotation(x)
@@ -188,11 +202,12 @@ class SolveStage(object):
         Returns two callables representing action
         Cube stays unchanged.
         '''
-        for pattern in self.stage_patterns:
+        for i, pattern in enumerate(self.stage_patterns):
             if self.verbosity: print "Checking pattern:", pattern._pattern
             match = pattern.check_at_all_positions(cube)
             if self.verbosity: print "Match:", match
             if match is not None:
+                if self.verbosity: print "MATCH: %d" % (i+1)
                 matched_cube, path_to_match = match
                 return prepend_rotation_path_to_action(path_to_match,
                         pattern.perform_action)
@@ -205,16 +220,18 @@ class SolveStage(object):
 class SolvingProcess(object):
     
     stages = []
+    verbosity = 0
 
     def solve(self, cube):
         cube_copy = cube.copy()
         for stage in self.stages:
-            print "STAGE %s" % stage.__class__.__name__
+            if self.verbosity: print "STAGE %s" % stage.__class__.__name__
             for step in stage(cube_copy):
-                print 'yielding', step
+                #print 'yielding', step
                 yield step
-            print "AFTER STAGE %s WE GOT CUBE:" % stage.__class__.__name__
-            print cube_copy
+            if self.verbosity:
+                print "AFTER STAGE %s WE GOT CUBE:" % stage.__class__.__name__
+                print cube_copy
 
     __call__ = solve
 

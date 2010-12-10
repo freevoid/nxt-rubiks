@@ -53,9 +53,14 @@ def perform_united_operation(cube, op_type, op_parameters):
         cube = op(cube, op_parameters)
     return cube
 
-def perform_united_operations(cube, op_path):
+def perform_united_operations(cube, op_path, verbose=False):
     for op_type, op_parameters in op_path:
+        if verbose:
+            print "OPERATION:", op_type, op_parameters
         cube = perform_united_operation(cube, op_type, op_parameters)
+        if verbose:
+            print "CUBE AFTER OPERATION:"
+            print cube
     return cube
 
 def perform_coded_operations(cube, coded_operations):
