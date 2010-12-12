@@ -21,7 +21,7 @@ class CommanderMeta(type):
         op_prefix = '%s:' % opcode
         def performer(self, *args):
             if len(args) != argcount:
-                raise ValueError("Operation expected exacly %d arguments" % argcount)
+                raise ValueError("Operation expected exactly %d arguments" % argcount)
             msg = op_prefix + ':'.join(str(a) for a in args) + ':'
             self.brick.message_write(self.inbox_id, msg)
         return performer
