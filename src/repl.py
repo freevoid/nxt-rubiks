@@ -1,6 +1,6 @@
 import nxt
 
-from bluetooth_bridge import Commander
+from robots.rubiks_solver import RubiksRobot
 
 BRICK_HOST = '00:16:53:0D:17:8B'
 
@@ -11,5 +11,5 @@ if __name__=='__main__':
     else:
         b = nxt.find_one_brick(host=BRICK_HOST)
 
-    c = Commander(b)
+    r = RubiksRobot(b)
 
