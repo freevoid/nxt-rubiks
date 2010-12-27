@@ -4,10 +4,37 @@ const char CAMERA_PORT = OUT_C;
 
 bool HELP_VERTICAL_TURN = false;
 int STRONG_HORIZONTAL_TURN_POWER = 50;
-int NORMAL_HORIZONTAL_TURN_POWER = 30;
+int NORMAL_HORIZONTAL_TURN_POWER = 20;
 
-int pedestal_angle;
+int pedestal_angle = 0;
 int pedestal_angle_error = 0;
+int hand_angle = 0;
+int hand_angle_error = 0;
+
+sub smart_hand_turn(int angle, int strength) {
+    angle -= hand_angle_error;
+    int predicted_angle = hand_angle + angle;
+    RotateMotor(HAND_PORT, strength, angle);
+    hand_angle = MotorTachoCount(HAND_PORT);
+    hand_angle_error = hand_angle - predicted_angle;
+    TextOut(LCD_LINE3, 5, StrCat(NumToStr(hand_angle), " ", NumToStr(hand_angle_error), "     "));
+    if (abs(hand_angle) > 3600) {
+        hand_angle = 0;
+        ResetTachoCount(HAND_PORT);
+    }
+}
+sub smart_platform_turn(int angle, int strength) {
+    angle -= pedestal_angle_error;
+    int predicted_angle = pedestal_angle + angle;
+    RotateMotor(PEDESTAL_PORT, strength, angle);
+    pedestal_angle = MotorTachoCount(PEDESTAL_PORT);
+    pedestal_angle_error = pedestal_angle - predicted_angle;
+    TextOut(LCD_LINE2, 5, StrCat(NumToStr(pedestal_angle), " ", NumToStr(pedestal_angle_error), "     "));
+    if (pedestal_angle > 3600) {
+        pedestal_angle = 0;
+        ResetTachoCount(PEDESTAL_PORT);
+    }
+}
 
 sub ConfigureHorizontalTurnPower(int normal, int strong) {
     STRONG_HORIZONTAL_TURN_POWER = strong;
@@ -40,10 +67,8 @@ sub HorizontalTurn(int count, bool strong) {
     if (count == 3) {
         angle = -90;
     }
-    //angle -= pedestal_angle_error;
-    //int predicted_angle = pedestal_angle + angle;
-    RotateMotor(PEDESTAL_PORT, strength, angle);
-    //pedestal_angle_error = MotorTachoCount(PEDESTAL_PORT) - predicted_angle;
+
+    smart_platform_turn(angle, strength);
 }
 
 sub Move(int count, int power, int degree) {

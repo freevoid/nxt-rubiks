@@ -6,6 +6,8 @@ OPCODES = {
     'horizontal_turn': (2, 1),
     'move': (3, 3),
     'configure_hturn': (4, 2),
+    'horizontal_turn_ex': (5, 2),
+    'hand_turn': (6, 2),
     'exit': (666, 0),
 }
 

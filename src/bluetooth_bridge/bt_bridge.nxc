@@ -19,6 +19,8 @@
 #define CMD_HTURN 2
 #define CMD_MOVE 3
 #define CMD_CONFIG_HTURN 4
+#define CMD_HTURN_EX 5
+#define CMD_HAND_TURN 6
 #define CMD_EXIT 666
 
 // retvals
@@ -32,7 +34,7 @@ struct Command {
 
 inline void TextOutReplace(int x, int y, string msg)
 {
-    ClearLine(y);
+    //ClearLine(y);
     TextOut(x, y, msg);
 }
 
@@ -47,7 +49,7 @@ sub BTCheck(int conn){
 int cmd_turn(int args[]) {
     //TextOutReplace(0, INFO_LINE, StrCat("Turning! ", NumToStr(args[1]), ":", NumToStr(args[2])));
     //RotateMotor(args[0], args[1], args[2]);
-    ClearLine(INFO_LINE);
+    //ClearLine(INFO_LINE);
     return OK;
 }
 
@@ -57,12 +59,22 @@ int cmd_vturn(int args[]) {
 }
 
 int cmd_hturn(int args[]) {
-    HorizontalTurn(args[0], args[1]);
+    HorizontalTurn(args[0], false);
+    return OK;
+}
+
+int cmd_hturn_ex(int args[]) {
+    smart_platform_turn(args[0], args[1]);
     return OK;
 }
 
 int cmd_move(int args[]) {
     Move(args[0], args[1], args[2]);
+    return OK;
+}
+
+int cmd_hand_turn(int args[]) {
+    smart_hand_turn(args[0], args[1]);
     return OK;
 }
 
@@ -82,6 +94,10 @@ int execute_command(Command cmd) {
         return cmd_move(cmd.args);
     } else if (cmd.code == CMD_CONFIG_HTURN) {
         return cmd_configure_hor(cmd.args);
+    } else if (cmd.code == CMD_HTURN_EX) {
+        return cmd_hturn_ex(cmd.args);
+    } else if (cmd.code == CMD_HAND_TURN) {
+        return cmd_hand_turn(cmd.args);
     } else if (cmd.code == CMD_EXIT) {
         Stop(true);
     } else {
