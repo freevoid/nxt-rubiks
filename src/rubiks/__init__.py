@@ -14,6 +14,7 @@ class FaceType:
     UP = 'U'
 
     FACES = (BACK, DOWN, FRONT, UP, LEFT, RIGHT)
+    ENUMERATED_FACES = [(i+1, face) for (i, face) in enumerate(FACES)]
 
 CUBE_ROTATION = 'cube rotation'
 QUARTER_FACE_ROTATION = 'quarter face rotation'
