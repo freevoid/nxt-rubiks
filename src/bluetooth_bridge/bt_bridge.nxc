@@ -20,7 +20,8 @@
 #define CMD_MOVE 3
 #define CMD_CONFIG_HTURN 4
 #define CMD_HTURN_EX 5
-#define CMD_HAND_TURN 6
+#define CMD_CAMERA_TURN 6
+#define CMD_RESET_ANGLES 7
 #define CMD_EXIT 666
 
 // retvals
@@ -73,13 +74,18 @@ int cmd_move(int args[]) {
     return OK;
 }
 
-int cmd_hand_turn(int args[]) {
-    smart_hand_turn(args[0], args[1]);
+int cmd_camera_turn(int args[]) {
+    smart_camera_turn(args[0], args[1]);
     return OK;
 }
 
 int cmd_configure_hor(int args[]) {
     ConfigureHorizontalTurnPower(args[0], args[1]);
+    return OK;
+}
+
+int cmd_reset_angles(int args[]) {
+    reset_angles();
     return OK;
 }
 
@@ -96,8 +102,10 @@ int execute_command(Command cmd) {
         return cmd_configure_hor(cmd.args);
     } else if (cmd.code == CMD_HTURN_EX) {
         return cmd_hturn_ex(cmd.args);
-    } else if (cmd.code == CMD_HAND_TURN) {
-        return cmd_hand_turn(cmd.args);
+    } else if (cmd.code == CMD_CAMERA_TURN) {
+        return cmd_camera_turn(cmd.args);
+    } else if (cmd.code == CMD_RESET_ANGLES) {
+        return cmd_reset_angles(cmd.args);
     } else if (cmd.code == CMD_EXIT) {
         Stop(true);
     } else {

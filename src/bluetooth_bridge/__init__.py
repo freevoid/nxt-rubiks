@@ -7,7 +7,8 @@ OPCODES = {
     'move': (3, 3),
     'configure_hturn': (4, 2),
     'horizontal_turn_ex': (5, 2),
-    'hand_turn': (6, 2),
+    'camera_turn': (6, 2),
+    'reset_angles': (7, 0),
     'exit': (666, 0),
 }
 

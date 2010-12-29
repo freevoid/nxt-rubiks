@@ -8,32 +8,31 @@ int NORMAL_HORIZONTAL_TURN_POWER = 20;
 
 int pedestal_angle = 0;
 int pedestal_angle_error = 0;
-int hand_angle = 0;
-int hand_angle_error = 0;
+int camera_angle = 0;
+int camera_angle_error = 0;
 
-sub smart_hand_turn(int angle, int strength) {
-    angle -= hand_angle_error;
-    int predicted_angle = hand_angle + angle;
-    RotateMotor(HAND_PORT, strength, angle);
-    hand_angle = MotorTachoCount(HAND_PORT);
-    hand_angle_error = hand_angle - predicted_angle;
-    TextOut(LCD_LINE3, 5, StrCat(NumToStr(hand_angle), " ", NumToStr(hand_angle_error), "     "));
-    if (abs(hand_angle) > 3600) {
-        hand_angle = 0;
-        ResetTachoCount(HAND_PORT);
-    }
+sub reset_angles() {
+    pedestal_angle = 0;
+    pedestal_angle_error = 0;
+    camera_angle = 0;
+    camera_angle_error = 0;
+}
+
+sub smart_camera_turn(int angle, int strength) {
+    //angle -= camera_angle_error;
+    int predicted_angle = camera_angle + angle;
+    RotateMotor(CAMERA_PORT, strength, angle);
+    camera_angle = MotorTachoCount(CAMERA_PORT);
+    camera_angle_error = camera_angle - predicted_angle;
+    TextOut(LCD_LINE3, 5, StrCat(NumToStr(camera_angle), " ", NumToStr(camera_angle_error), "     "));
 }
 sub smart_platform_turn(int angle, int strength) {
-    angle -= pedestal_angle_error;
+    //angle -= pedestal_angle_error;
     int predicted_angle = pedestal_angle + angle;
     RotateMotor(PEDESTAL_PORT, strength, angle);
     pedestal_angle = MotorTachoCount(PEDESTAL_PORT);
     pedestal_angle_error = pedestal_angle - predicted_angle;
     TextOut(LCD_LINE2, 5, StrCat(NumToStr(pedestal_angle), " ", NumToStr(pedestal_angle_error), "     "));
-    if (pedestal_angle > 3600) {
-        pedestal_angle = 0;
-        ResetTachoCount(PEDESTAL_PORT);
-    }
 }
 
 sub ConfigureHorizontalTurnPower(int normal, int strong) {
