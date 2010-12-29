@@ -3,6 +3,18 @@ from cStringIO import StringIO
 
 from rubiks import RotationType, FaceType
 
+COLORS = {
+    '1': '\033[1;32m', # Green
+    '2': '\033[1;36m', # Blue (Cyan)
+    '3': '\033[1;33m', # Yellow
+    '4': '\033[1;37m', # White
+    '5': '\033[1;31m', # Red
+    '6': '\033[1;35m', # Purple (there's no orange)
+}
+
+def _colored_cubie(color):
+    return '%s%s' % (COLORS.get(str(color), ''), color)
+
 class Cube(object):
     def __init__(self, cube_context):
         self._context = cube_context
@@ -27,13 +39,14 @@ class Cube(object):
         f = StringIO()
         f.write("    .---.\n")
         for row in left:
-            f.write("    |%s|\n" % ''.join(map(str, row)))
+            f.write("    |%s\033[1;m|\n" % ''.join(map(_colored_cubie, row)))
         f.write(".---.---.---.---.\n")
         for row in numpy.concatenate((back, down, front, up), axis=1):
-            f.write("|%s%s%s|%s%s%s|%s%s%s|%s%s%s|\n" % tuple(row))
+            f.write("|%s%s%s\033[1;m|%s%s%s\033[1;m|%s%s%s\033[1;m|%s%s%s\033[1;m|\n" % \
+                tuple(map(_colored_cubie, row)))
         f.write(".---.---.---.---.\n")
         for row in right:
-            f.write("    |%s|\n" % ''.join(map(str, row)))
+            f.write("    |%s\033[1;m|\n" % ''.join(map(_colored_cubie, row)))
         f.write("    .---.\n")
 
         return f.getvalue()
