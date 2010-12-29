@@ -1,6 +1,6 @@
 import nxt
 
-from robots.rubiks_solver import RubiksRobot
+from robots.rubiks_solver import *
 
 BRICK_HOST = '00:16:53:0D:17:8B'
 
