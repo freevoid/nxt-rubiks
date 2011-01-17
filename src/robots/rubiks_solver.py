@@ -1,4 +1,5 @@
 import time
+import logging
 
 import nxt
 
@@ -16,12 +17,13 @@ class RubiksRobot(object):
 
     CUBE_CHECK_PERIOD = 1
     MAX_CUBE_PLACED_DISTANCE = 25
-    ACCURATE_TURN_STRENGTH = 20
+    ACCURATE_TURN_STRENGTH = 40
+    SENSOR_TURN_STRENGTH = 20
 
-    def __init__(self, brick):
-        self.brick = brick
-        self.cmd = Commander(brick)
+    def __init__(self, brick_host=None):
+        self.cmd = Commander(brick_finder=lambda: nxt.find_one_brick(host=brick_host))
 
+        brick = self.cmd.brick
         self.platform_motor = nxt.Motor(brick, self.PLATFORM_MOTOR_PORT)
         self.hand_motor = nxt.Motor(brick, self.HAND_MOTOR_PORT)
         self.color_sensor_motor = nxt.Motor(brick, self.COLOR_SENSOR_MOTOR_PORT)
@@ -29,8 +31,6 @@ class RubiksRobot(object):
         self.sonar = nxt.Ultrasonic(brick, self.SONAR_PORT)
 
         self.motors = [self.hand_motor, self.platform_motor, self.color_sensor_motor]
-
-        self._cs_angle_delta = 0
 
         self.idle_all()
         self.reset_rotation_counts()
@@ -57,25 +57,32 @@ class RubiksRobot(object):
             time.sleep(self.CUBE_CHECK_PERIOD)
 
     def turn_platform(self, angle, accurate=True):
+        logging.info("TURN PLATFORM ISSUED: ANGLE %d" % angle)
         strength = accurate and self.ACCURATE_TURN_STRENGTH or self.ACCURATE_TURN_STRENGTH*2
         self.cmd.horizontal_turn_ex(angle, strength)
 
     def turn_color_sensor(self, angle):
-        self.cmd.camera_turn(angle, self.ACCURATE_TURN_STRENGTH)
-        self._cs_angle_delta += angle
+        logging.info("TURN SENSOR   ISSUED: ANGLE %d" % angle)
+        self.cmd.camera_turn(angle, self.SENSOR_TURN_STRENGTH)
 
     def scan_face(self):
         return scan_cube_face(self)
 
     def get_color(self):
-        return self.color_sensor.get_color()
+        color = self.color_sensor.get_color()
+        logging.info("GETTING COLOR: %d" % color)
+        return color
 
-    def remember_color_sensor(self):
-        self._cs_angle_delta = 0
+    def move_color_sensor_at_start(self):
+        try:
+            self.color_sensor_motor.turn(-64, 360, timeout=0.05, brake=True)
+        except nxt.BlockedException:
+            pass
 
-    def move_color_sensor_back(self):
-        self.turn_color_sensor(-self._cs_angle_delta)
-
+        self.color_sensor_motor.turn(5, 2, brake=True)
+        time.sleep(0.4)
+        self.color_sensor_motor.idle()
+        self.cmd.reset_angles()
 
 MOVE_TIME = 1.5
 
@@ -84,24 +91,22 @@ def scan_and_rotate(robot):
         # TODO: check that platform is not moving
         yield robot.get_color()
         robot.turn_platform(90)
-        time.sleep(MOVE_TIME)
 
 def _scan_cube_face(robot):
-    robot.remember_color_sensor()
-    robot.turn_color_sensor(45) # move below center
-    time.sleep(MOVE_TIME)
+    robot.move_color_sensor_at_start()
+    robot.turn_color_sensor(166) # move below center
     # yield center cubie's color
     yield robot.get_color()
-    robot.turn_color_sensor(35)
+    robot.turn_color_sensor(28)
     for color in scan_and_rotate(robot):
         yield color
-    robot.turn_color_sensor(-1)
+    robot.turn_color_sensor(-4)
     robot.turn_platform(45)
-    time.sleep(MOVE_TIME)
     for color in scan_and_rotate(robot):
         yield color
     robot.turn_platform(-45)
-    robot.move_color_sensor_back()
+    #robot.move_color_sensor_at_start()
+    robot.turn_color_sensor(-90)
 
 FACE_SCAN_MAPPING = {
     0: 4,
@@ -115,6 +120,15 @@ FACE_SCAN_MAPPING = {
     8: 2
 }
 
+NXT_COLOR_MAPPING = {
+    1: 6,
+    2: 2,
+    3: 1,
+    4: 3,
+    5: 5,
+    6: 4,
+}
+
 def scan_cube_face(robot):
     raw_faces = list(_scan_cube_face(robot))
     face = [0]*9
@@ -125,9 +139,11 @@ def scan_cube_face(robot):
 def scan_cube(robot):
     c = Cube({})
 
-    scan_n_set = lambda face_type:\
+    def scan_n_set(face_type):
         c.set_face(face_type,
-            c.face_from_label_list(list(scan_cube_face(robot))))
+            c.face_from_label_list(map(NXT_COLOR_MAPPING.get, scan_cube_face(robot))))
+        logging.info("Scan completed for face %s. Cube:")
+        logging.info("%s", c)
 
     scan_n_set(FaceType.UP)
     robot.cmd.vertical_turn()
@@ -147,5 +163,6 @@ def scan_cube(robot):
     robot.turn_platform(-90)
     robot.cmd.vertical_turn()
     robot.turn_platform(90)
-    
+
+    return c
 
