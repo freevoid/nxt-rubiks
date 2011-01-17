@@ -4,6 +4,7 @@ from cStringIO import StringIO
 from rubiks import RotationType, FaceType
 
 COLORS = {
+    '0': '',
     '1': '\033[1;32m', # Green
     '2': '\033[1;36m', # Blue (Cyan)
     '3': '\033[1;33m', # Yellow
@@ -104,8 +105,13 @@ class NumpyCube(Cube):
         else:
             return face.copy()
 
+    @staticmethod
+    def null_face():
+        return numpy.zeros((3,3), int)
+
     def get_face(self, face_name):
-        return self._context[face_name]
+        face = self._context.get(face_name)
+        return face if face is not None else self.null_face()
 
     def get_flat_face(self, face_name):
         return self._context[face_name].flat
