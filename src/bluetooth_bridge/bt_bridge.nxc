@@ -2,9 +2,9 @@
 
 #define BT_CONN 0
 #define INBOX 1
-#define OUTBOX 5
+#define OUTBOX 10
 
-#define RECEIVE_DELAY 100
+#define RECEIVE_DELAY 50
 #define ACK "ack"
 
 #define CMD_ECHO_LINE LCD_LINE3
@@ -22,6 +22,7 @@
 #define CMD_HTURN_EX 5
 #define CMD_CAMERA_TURN 6
 #define CMD_RESET_ANGLES 7
+#define CMD_CONFIG_VTURN 8
 #define CMD_EXIT 666
 
 // retvals
@@ -30,6 +31,7 @@
 
 struct Command {
     int code;
+    int id;
     int args[5];
 };
 
@@ -84,33 +86,44 @@ int cmd_configure_hor(int args[]) {
     return OK;
 }
 
+int cmd_configure_ver(int args[]) {
+    ConfigureHandPower(args[0], args[1]);
+    return OK;
+}
+
 int cmd_reset_angles(int args[]) {
     reset_angles();
     return OK;
 }
 
 int execute_command(Command cmd) {
+    int retval = -1;
+
     if (cmd.code == CMD_TURN) {
-        return cmd_turn(cmd.args);
+        retval = cmd_turn(cmd.args);
     } else if (cmd.code == CMD_VTURN) {
-        return cmd_vturn(cmd.args);
+        retval = cmd_vturn(cmd.args);
     } else if (cmd.code == CMD_HTURN) {
-        return cmd_hturn(cmd.args);
+        retval = cmd_hturn(cmd.args);
     } else if (cmd.code == CMD_MOVE) {
-        return cmd_move(cmd.args);
+        retval = cmd_move(cmd.args);
+    } else if (cmd.code == CMD_CONFIG_VTURN) {
+        retval = cmd_configure_ver(cmd.args);
     } else if (cmd.code == CMD_CONFIG_HTURN) {
-        return cmd_configure_hor(cmd.args);
+        retval = cmd_configure_hor(cmd.args);
     } else if (cmd.code == CMD_HTURN_EX) {
-        return cmd_hturn_ex(cmd.args);
+        retval = cmd_hturn_ex(cmd.args);
     } else if (cmd.code == CMD_CAMERA_TURN) {
-        return cmd_camera_turn(cmd.args);
+        retval = cmd_camera_turn(cmd.args);
     } else if (cmd.code == CMD_RESET_ANGLES) {
-        return cmd_reset_angles(cmd.args);
+        retval = cmd_reset_angles(cmd.args);
     } else if (cmd.code == CMD_EXIT) {
         Stop(true);
     } else {
-        return E_WRONG_OPCODE;
+        retval = E_WRONG_OPCODE;
     }
+
+    return retval;
 }
 
 inline void enhanced_strcpy(string starray[], int idx, string src) {
@@ -126,6 +139,8 @@ Command parse_command(string cmdstring) {
     ArrayInit(cmd.args, -1, 5);
 
     cmd.code = -1;
+    cmd.id = -1;
+    int id = -1;
     int code = -1;
     int lasttokenpos = 0;
     int tokenidx = 0;
@@ -134,11 +149,16 @@ Command parse_command(string cmdstring) {
         if (cur == CMD_SEPARATOR) {
             string token = SubStr(cmdstring, lasttokenpos, i-lasttokenpos);
             if (code != -1) {
-                //string a = cmd.args[tokenidx];
-                //strcpy(a, token);
-                cmd.args[tokenidx] = StrToNum(token);
-                //enhanced_strcpy(cmd.args, tokenidx, token);
-                tokenidx++;
+                if (id != -1) {
+                    //string a = cmd.args[tokenidx];
+                    //strcpy(a, token);
+                    cmd.args[tokenidx] = StrToNum(token);
+                    //enhanced_strcpy(cmd.args, tokenidx, token);
+                    tokenidx++;
+                } else {
+                    id = StrToNum(token);
+                    cmd.id = id;
+                }
             } else {
                 code = StrToNum(token);
                 cmd.code = code;
@@ -149,7 +169,7 @@ Command parse_command(string cmdstring) {
     return cmd;
 }
 
-sub perform_command(string cmd){
+int perform_command(string cmd){
     Command parsed_cmd;
     int retval;
 
@@ -159,10 +179,13 @@ sub perform_command(string cmd){
     retval = execute_command(parsed_cmd);
 
     TextOutReplace(10, RESPONSE_ECHO_LINE, NumToStr(retval));
+    return parsed_cmd.id;
 }
 
 task main(){
     string in;
+    int result;
+    string response;
     //BTCheck(0); //check master connection
 
     //TextOut(10,LCD_LINE1,"Master Connected");
@@ -171,8 +194,11 @@ task main(){
 
     while(true){
         ReceiveRemoteString(INBOX, true, in);
-        perform_command(in);
-        SendResponseString(OUTBOX, ACK);
+        result = perform_command(in);
+        if (result != -1) {
+            response = NumToStr(result);
+            SendMessage(OUTBOX, response);
+        }
         Wait(RECEIVE_DELAY);
     }
 }

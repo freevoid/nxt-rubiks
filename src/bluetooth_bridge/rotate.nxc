@@ -6,6 +6,9 @@ bool HELP_VERTICAL_TURN = false;
 int STRONG_HORIZONTAL_TURN_POWER = 50;
 int NORMAL_HORIZONTAL_TURN_POWER = 20;
 
+int FORWARD_HAND_SPEED = 88;
+int BACKWARD_HAND_SPEED = 50;
+
 int pedestal_angle = 0;
 int pedestal_angle_error = 0;
 int camera_angle = 0;
@@ -21,12 +24,13 @@ sub reset_angles() {
 sub smart_camera_turn(int angle, int strength) {
     //angle -= camera_angle_error;
     int predicted_angle = camera_angle + angle;
-    RotateMotor(CAMERA_PORT, strength, angle);
+    RotateMotorEx(CAMERA_PORT, strength, angle, 0, false, true);
     camera_angle = MotorTachoCount(CAMERA_PORT);
     camera_angle_error = camera_angle - predicted_angle;
     TextOut(LCD_LINE3, 5, StrCat(NumToStr(camera_angle), " ", NumToStr(camera_angle_error), "     "));
 }
 sub smart_platform_turn(int angle, int strength) {
+    angle *= -3;
     //angle -= pedestal_angle_error;
     int predicted_angle = pedestal_angle + angle;
     RotateMotor(PEDESTAL_PORT, strength, angle);
@@ -40,9 +44,21 @@ sub ConfigureHorizontalTurnPower(int normal, int strong) {
     NORMAL_HORIZONTAL_TURN_POWER = normal;
 }
 
+sub ConfigureHandPower(int forward, int backward) {
+    FORWARD_HAND_SPEED = forward;
+    BACKWARD_HAND_SPEED = backward;
+}
+
 sub VerticalTurn() {
     Off(PEDESTAL_PORT);
-    RotateMotor(HAND_PORT, 88, 65);
+    RotateMotor(HAND_PORT, 30, 36);
+    Wait(300);
+    RotateMotor(HAND_PORT, 110, 33);
+    Wait(200);
+    RotateMotor(HAND_PORT, 50, -65);
+
+/*
+    RotateMotor(HAND_PORT, FORWARD_HAND_SPEED, 65);
     Wait(400);
     if (HELP_VERTICAL_TURN) {
         RotateMotor(HAND_PORT, 50, -45);
@@ -50,13 +66,14 @@ sub VerticalTurn() {
         Wait(100);
         RotateMotor(HAND_PORT, 50, -35);
     } else {
-        RotateMotor(HAND_PORT, 50, -65);
-    }
+        RotateMotor(HAND_PORT, BACKWARD_HAND_SPEED, -65);
+    }*/
 }
 
 sub HorizontalTurn(int count, bool strong) {
     int strength = strong ? STRONG_HORIZONTAL_TURN_POWER : NORMAL_HORIZONTAL_TURN_POWER;
     int angle;
+    int correct = 20;
     if (count == 1) {
         angle = 90;
     }
@@ -65,9 +82,11 @@ sub HorizontalTurn(int count, bool strong) {
     }
     if (count == 3) {
         angle = -90;
+        correct = -correct;
     }
 
-    smart_platform_turn(angle, strength);
+    smart_platform_turn(angle + correct, strength);
+    smart_platform_turn(-correct, strength);
 }
 
 sub Move(int count, int power, int degree) {
