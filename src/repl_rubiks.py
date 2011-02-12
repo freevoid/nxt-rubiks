@@ -8,6 +8,7 @@ from rubiks.solver.simplest import *
 from rubiks.solver import base
 from rubiks import *
 from rubiks import rotation, cube_operation, face_turn
+from rubiks import cube_analyze
 
 def try_stage(c, s):
     try:
@@ -25,6 +26,26 @@ scramle_path = "FUF'DUFRU2L'B2FU2LF'DU'"
 c = Cube.from_scramble_path(scramle_path)
 rc = make_shuffled_cube()
 pcc = cube_operation.perform_united_operations(c.copy(), s.solve(c))
+
+mfc = Cube(
+        {'B': array([[1, 3, 6],
+            [5, 5, 1],
+            [5, 4, 3]]),
+        'D': array([[1, 2, 5],
+            [2, 2, 2],
+            [6, 2, 3]]),
+        'F': array([[3, 4, 1],
+            [5, 0, 5],
+            [4, 6, 3]]),
+        'L': array([[6, 1, 4],
+            [4, 0, 5],
+            [4, 6, 4]]),
+        'R': array([[2, 3, 6],
+            [1, 1, 4],
+            [2, 3, 5]]),
+        'U': array([[5, 6, 2],
+            [1, 0, 3],
+            [2, 6, 1]])})
 
 '''Cube(
         {'B': array([[1, 3, 6],
